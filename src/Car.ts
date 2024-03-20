@@ -19,6 +19,18 @@ export const Car = (x: number, y: number, width: number, height: number) => {
     ctx.fill();
 
     ctx.beginPath();
+    ctx.fillStyle = "white";
+    ctx.arc(-width / 2 + 10, -height / 2 + 10, 5, 0, 2 * Math.PI);
+    ctx.arc(width / 2 - 10, -height / 2 + 10, 5, 0, 2 * Math.PI);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.fillStyle = "red";
+    ctx.rect(-width / 2 + 5, height / 2 - 10, 10, 5);
+    ctx.rect(width / 2 - 15, height / 2 - 10, 10, 5);
+    ctx.fill();
+
+    ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.strokeStyle = "red";
     const length = speed * 50;
@@ -31,6 +43,10 @@ export const Car = (x: number, y: number, width: number, height: number) => {
   };
 
   const update = () => {
+    move();
+  };
+
+  const move = () => {
     if (directions.forward) {
       speed += acceleration;
     }
