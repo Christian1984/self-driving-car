@@ -1,7 +1,11 @@
 import { Controls } from "./Controls";
+import { Point } from "./Geometry";
+import { Sensor } from "./Sensor";
 
-export const Car = (x: number, y: number, width: number, height: number) => {
+export const Car = (x: number, y: number, width: number, height: number, color: string = "black", debug: boolean = false) => {
   const { directions } = Controls();
+
+  const initialPos = { x: x, y: y };
 
   let speed = 0;
   const maxSpeed = 5;
@@ -11,10 +15,14 @@ export const Car = (x: number, y: number, width: number, height: number) => {
   let angle = 0;
   const rotation = 0.03;
 
+  const sensor = Sensor(5, 100, Math.PI / 2);
+
   const draw = (ctx: CanvasRenderingContext2D) => {
     ctx.beginPath();
+    ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle);
+    ctx.fillStyle = color;
     ctx.rect(-width / 2, -height / 2, width, height);
     ctx.fill();
 
@@ -31,19 +39,33 @@ export const Car = (x: number, y: number, width: number, height: number) => {
     ctx.fill();
 
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.strokeStyle = "red";
-    const length = speed * 50;
-    // ctx.rotate(-angle);
-    // ctx.lineTo(length * Math.sin(angle), -length * Math.cos(angle));
-    ctx.lineTo(0, -length);
-    ctx.stroke();
+    ctx.fillStyle = "blue";
+    ctx.rect(-width / 2 + 5, -height / 2 + 28, width - 10, 20);
+    ctx.fill();
 
     ctx.restore();
+
+    sensor.draw(ctx);
+
+    if (debug) {
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.strokeStyle = "red";
+      const length = (speed / maxSpeed) * height;
+      ctx.lineTo(0, -length);
+      ctx.stroke();
+
+      ctx.restore();
+    }
   };
 
   const update = () => {
     move();
+    sensor.update({ x, y }, angle);
   };
 
   const move = () => {
@@ -85,5 +107,15 @@ export const Car = (x: number, y: number, width: number, height: number) => {
     y -= speed * Math.cos(angle);
   };
 
-  return { draw, update };
+  const getPos = () => Point(x, y);
+
+  const getAngle = () => angle;
+
+  const reset = () => {
+    y = initialPos.y;
+  };
+
+  return { draw, update, getPos, getAngle, reset };
 };
+
+export type CarType = ReturnType<typeof Car>;

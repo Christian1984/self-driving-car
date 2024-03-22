@@ -8,8 +8,6 @@ export const Controls = () => {
 
   const addKeyboardListeners = () => {
     document.onkeydown = (e: KeyboardEvent) => {
-      console.log("keydown -> e.key:", e.key);
-
       switch (e.key) {
         case "ArrowUp":
           directions.forward = true;
@@ -24,13 +22,9 @@ export const Controls = () => {
           directions.reverse = true;
           break;
       }
-
-      console.table(directions);
     };
 
     document.onkeyup = (e: KeyboardEvent) => {
-      console.log("keyup -> e.key:", e.key);
-
       switch (e.key) {
         case "ArrowUp":
           directions.forward = false;
@@ -45,8 +39,6 @@ export const Controls = () => {
           directions.reverse = false;
           break;
       }
-
-      console.table(directions);
     };
   };
 
