@@ -1,5 +1,5 @@
 import { Controls } from "./Controls";
-import { Point } from "./Geometry";
+import { Point, SegmentType } from "./Geometry";
 import { Sensor } from "./Sensor";
 
 export const Car = (x: number, y: number, width: number, height: number, color: string = "black", debug: boolean = false) => {
@@ -15,7 +15,7 @@ export const Car = (x: number, y: number, width: number, height: number, color: 
   let angle = 0;
   const rotation = 0.03;
 
-  const sensor = Sensor(5, 100, Math.PI / 2);
+  const sensor = Sensor(5, 200, (Math.PI * 2) / 3);
 
   const draw = (ctx: CanvasRenderingContext2D) => {
     ctx.beginPath();
@@ -63,9 +63,9 @@ export const Car = (x: number, y: number, width: number, height: number, color: 
     }
   };
 
-  const update = () => {
+  const update = (roadBorders: SegmentType[]) => {
     move();
-    sensor.update({ x, y }, angle);
+    sensor.update({ x, y }, angle, roadBorders);
   };
 
   const move = () => {

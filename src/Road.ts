@@ -1,40 +1,45 @@
+import { Point, Segment } from "./Geometry";
 import { lerp } from "./utils";
 
 export const Road = (width: number, height: number, lanes: number) => {
   const lineWidth = 5;
 
-  const getLaneCenter = (lane: number) => {
-    if (lane < 0) lane = 0;
-    if (lane > lanes - 1) lane = lanes - 1;
+  return {
+    getLaneCenter: (lane: number) => {
+      if (lane < 0) lane = 0;
+      if (lane > lanes - 1) lane = lanes - 1;
 
-    return (
-      lerp(lineWidth, width - lineWidth, lane / lanes) +
-      (lerp(lineWidth, width - lineWidth, (lane + 1) / lanes) - lerp(lineWidth, width - lineWidth, lane / lanes)) / 2
-    );
-  };
+      return (
+        lerp(lineWidth, width - lineWidth, lane / lanes) +
+        (lerp(lineWidth, width - lineWidth, (lane + 1) / lanes) - lerp(lineWidth, width - lineWidth, lane / lanes)) / 2
+      );
+    },
+    getRoadBorders: () => {
+      return [
+        Segment(Point(lineWidth, 0), Point(lineWidth, height)),
+        Segment(Point(width - lineWidth, 0), Point(width - lineWidth, height)),
+      ];
+    },
+    update: () => {},
+    draw: (ctx: CanvasRenderingContext2D) => {
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = "white";
 
-  const update = () => {};
+      for (let lane = 0; lane <= lanes; lane++) {
+        ctx.beginPath();
 
-  const draw = (ctx: CanvasRenderingContext2D) => {
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = "white";
+        if (lane == 0 || lane == lanes) {
+          ctx.setLineDash([]);
+        } else {
+          ctx.setLineDash([40, 40]);
+        }
 
-    for (let lane = 0; lane <= lanes; lane++) {
-      ctx.beginPath();
+        const x = lerp(lineWidth, width - lineWidth, lane / lanes);
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
 
-      if (lane == 0 || lane == lanes) {
-        ctx.setLineDash([]);
-      } else {
-        ctx.setLineDash([40, 40]);
+        ctx.stroke();
       }
-
-      const x = lerp(lineWidth, width - lineWidth, lane / lanes);
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-
-      ctx.stroke();
-    }
+    },
   };
-
-  return { getLaneCenter, update, draw };
 };

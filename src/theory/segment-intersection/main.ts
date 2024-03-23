@@ -1,6 +1,4 @@
-import { Car } from "./Car";
-import { Road } from "./Road";
-import "./style.scss";
+import "../../style.scss";
 
 const debug = true;
 
@@ -12,31 +10,12 @@ const max_road_length = 100000;
 const lanes = 3;
 
 const c = document.querySelector<HTMLCanvasElement>("canvas")!;
-c.width = 500;
 
 const ctx = c.getContext("2d")!;
 
-const road = Road(c.width, max_road_length, lanes);
-const car = Car(road.getLaneCenter(Math.floor(lanes / 2)), max_road_length / 2, 50, 100, "black", debug);
-const cars = [car];
-
 const animate = () => {
   c.height = window.innerHeight; // this automatically clears the canvas
-
-  road.update();
-  car.update(road.getRoadBorders());
-
-  if (car.getPos().y < 2 * window.innerHeight) {
-    for (const c of cars) {
-      c.reset();
-    }
-  }
-
-  ctx.save();
-  ctx.translate(0, -car.getPos().y + c.height * 0.7);
-  road.draw(ctx);
-  car.draw(ctx);
-  ctx.restore();
+  c.width = window.innerWidth;
 
   if (debug) {
     const now = Date.now();
