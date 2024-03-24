@@ -13,24 +13,81 @@ const c = document.querySelector<HTMLCanvasElement>("canvas")!;
 
 const ctx = c.getContext("2d")!;
 
+const SegmentAnimation = (radius: number, startPos: PointType, startAngle: number, v: number, rv: number) => {
+    let angle = startAngle;
+    let pos = startPos;
+    let initialDir = Math.random() * Math.PI * 2;
+
+    let velX = v * Math.sin(initialDir);
+    let velY = v * Math.cos(initialDir);
+
+    const update = (delta: number) => {
+        angle += rv * delta;
+        pos.x += velX * delta;
+        pos.y += velY * delta;
+
+        if (pos.x < 0 || pos.x > window.innerWidth) velX *= -1;
+        if (pos.y < 0 || pos.y > window.innerHeight) velY *= -1;
+    };
+
+    const getSegment = () =>
+        Segment(
+            Point(pos.x + radius * Math.sin(angle), pos.y - radius * Math.cos(angle)),
+            Point(pos.x - radius * Math.sin(angle), pos.y + radius * Math.cos(angle))
+        );
+
+    return { getSegment, update };
+};
+
+type SegmentAnimationType = ReturnType<typeof SegmentAnimation>;
+
+const initSegmentAnimations = (
+    count: number,
+    xMin: number,
+    yMin: number,
+    xMax: number,
+    yMax: number,
+    rMin: number,
+    rMax: number,
+    vMin: number,
+    vMax: number,
+    rvMin: number,
+    rvMax: number
+) => {
+    const segmentAnimations: SegmentAnimationType[] = [];
+
+    for (let i = 0; i < count; i++) {
+        segmentAnimations.push(
+            SegmentAnimation(
+                lerp(rMin, rMax, Math.random()),
+                Point(lerp(xMin, xMax, Math.random()), lerp(yMin, yMax, Math.random())),
+                Math.random() * Math.PI * 2,
+                lerp(vMin, vMax, Math.random()),
+                lerp(rvMin, rvMax, Math.random())
+            )
+        );
+    }
+
+    return segmentAnimations;
+};
+
 const p1 = Point(100, 100);
 const p2 = Point(500, 500);
-
-const p3 = Point(350, 50);
-const p4 = Point(150, 400);
-
-const p5 = Point(500, 100);
-const p6 = Point(500, 600);
-
-const p7 = Point(300, 200);
-const p8 = Point(800, 200);
-
 let s1 = Segment(p1, p2);
-const s2 = Segment(p3, p4);
-const s3 = Segment(p5, p6);
-const s4 = Segment(p7, p8);
 
-const segments = [s2, s3, s4];
+const segmentAnimations = initSegmentAnimations(
+    10,
+    0,
+    0,
+    window.innerWidth,
+    window.innerHeight,
+    100,
+    500,
+    2,
+    5,
+    -0.02,
+    0.02
+);
 
 let mouse = Point(0, 0);
 
@@ -110,15 +167,15 @@ const drawSegment = (labelStart: string, labelEnd: string, segment: SegmentType)
     drawPoint(labelEnd, segment.end);
 };
 
-const drawPoint = (label: string, point: PointType) => {
+const drawPoint = (label: string, point: PointType, green = false) => {
     ctx.beginPath();
     ctx.arc(point.x, point.y, 20, 0, 2 * Math.PI);
-    ctx.fillStyle = "white";
+    ctx.fillStyle = green ? "green" : "white";
     ctx.stroke();
     ctx.fill();
 
     ctx.beginPath();
-    ctx.fillStyle = "black";
+    ctx.fillStyle = green ? "white" : "black";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = "normal 16px Verdana";
@@ -133,33 +190,38 @@ const animate = () => {
     const frameTime = now - lastFrame;
     lastFrame = now;
 
-    s1 = Segment(Point(mouse.x + 50, mouse.y + 50), Point(mouse.x - 50, mouse.y - 50));
+    // const s1r = 200;
+    // s1 = Segment(Point(mouse.x + s1r, mouse.y + s1r), Point(mouse.x - s1r, mouse.y - s1r));
 
-    drawSegment("A", "B", s1);
+    //drawSegment("A", "B", s1);
 
     let intersections: PointType[] = [];
 
-    for (const [i, segment] of segments.entries()) {
-        drawSegment(`${2 * i}`, `${2 * i + 1}`, segment);
+    for (const segmentAnimation of segmentAnimations) {
+        segmentAnimation.update(frameTime / frameTimeReference);
+    }
 
-        for (const [j, segment2] of segments.entries()) {
+    for (const [i, segmentAnimation] of segmentAnimations.entries()) {
+        drawSegment(`${2 * i}`, `${2 * i + 1}`, segmentAnimation.getSegment());
+
+        for (const [j, segment2] of segmentAnimations.entries()) {
             if (j <= i) continue;
-            const n = getIntersect(segment, segment2);
+            const n = getIntersect(segmentAnimation.getSegment(), segment2.getSegment());
 
             if (n) {
                 intersections.push(n);
             }
         }
 
-        const n = getIntersect(s1, segment);
+        // const n = getIntersect(s1, segmentAnimation.getSegment());
 
-        if (n) {
-            intersections.push(n);
-        }
+        // if (n) {
+        //     intersections.push(n);
+        // }
     }
 
     for (const [i, n] of intersections.entries()) {
-        drawPoint(`N${i}`, n);
+        drawPoint(`N${i}`, n, true);
     }
 
     if (debug) {
