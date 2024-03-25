@@ -17,7 +17,14 @@ c.width = 500;
 const ctx = c.getContext("2d")!;
 
 const road = Road(c.width, max_road_length, lanes);
-const car = Car(road.getLaneCenter(Math.floor(lanes / 2)), max_road_length / 2, 50, 100, "black", debug);
+const car = Car(
+  road.getLaneCenter(Math.floor(lanes / 2)),
+  max_road_length / 2,
+  50,
+  100,
+  "black",
+  debug,
+);
 const cars = [car];
 
 const animate = () => {
@@ -46,7 +53,9 @@ const animate = () => {
     if (avgFrameTimeSamples == 0) {
       avgFrameTime = frameTime;
     } else {
-      avgFrameTime = (avgFrameTime * avgFrameTimeSamples + frameTime) / (avgFrameTimeSamples + 1);
+      avgFrameTime =
+        (avgFrameTime * avgFrameTimeSamples + frameTime) /
+        (avgFrameTimeSamples + 1);
     }
 
     avgFrameTimeSamples++;

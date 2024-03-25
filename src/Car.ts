@@ -2,7 +2,14 @@ import { Controls } from "./Controls";
 import { Point, PointType, Segment, SegmentType } from "./Geometry";
 import { Sensor } from "./Sensor";
 
-export const Car = (x: number, y: number, width: number, height: number, color: string = "black", debug: boolean = false) => {
+export const Car = (
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  color: string = "black",
+  debug: boolean = false,
+) => {
   const { directions } = Controls();
 
   const initialPos = { x: x, y: y };
@@ -94,7 +101,9 @@ export const Car = (x: number, y: number, width: number, height: number, color: 
     for (const [i, pt] of pointsTransformed.entries()) {
       if (pointsTransformed.length > 1) {
         if (i == 0) {
-          polygon.push(Segment(pointsTransformed[pointsTransformed.length - 1], pt));
+          polygon.push(
+            Segment(pointsTransformed[pointsTransformed.length - 1], pt),
+          );
         } else {
           polygon.push(Segment(pt, pointsTransformed[i - 1]));
         }

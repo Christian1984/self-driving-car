@@ -11,7 +11,9 @@ export const Road = (width: number, height: number, lanes: number) => {
 
       return (
         lerp(lineWidth, width - lineWidth, lane / lanes) +
-        (lerp(lineWidth, width - lineWidth, (lane + 1) / lanes) - lerp(lineWidth, width - lineWidth, lane / lanes)) / 2
+        (lerp(lineWidth, width - lineWidth, (lane + 1) / lanes) -
+          lerp(lineWidth, width - lineWidth, lane / lanes)) /
+          2
       );
     },
     getRoadBorders: () => {

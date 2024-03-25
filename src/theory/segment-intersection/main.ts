@@ -13,7 +13,13 @@ const c = document.querySelector<HTMLCanvasElement>("canvas")!;
 
 const ctx = c.getContext("2d")!;
 
-const SegmentAnimation = (radius: number, startPos: PointType, startAngle: number, v: number, rv: number) => {
+const SegmentAnimation = (
+  radius: number,
+  startPos: PointType,
+  startAngle: number,
+  v: number,
+  rv: number,
+) => {
   let angle = startAngle;
   let pos = startPos;
   let initialDir = Math.random() * Math.PI * 2;
@@ -22,8 +28,10 @@ const SegmentAnimation = (radius: number, startPos: PointType, startAngle: numbe
   let velY = v * Math.cos(initialDir);
 
   const update = (delta: number) => {
-    if (pos.x + velX * delta < 0 || pos.x + velX * delta > window.innerWidth) velX *= -1;
-    if (pos.y + velY * delta < 0 || pos.y + velY * delta > window.innerHeight) velY *= -1;
+    if (pos.x + velX * delta < 0 || pos.x + velX * delta > window.innerWidth)
+      velX *= -1;
+    if (pos.y + velY * delta < 0 || pos.y + velY * delta > window.innerHeight)
+      velY *= -1;
 
     angle += rv * delta;
     pos.x += velX * delta;
@@ -33,7 +41,7 @@ const SegmentAnimation = (radius: number, startPos: PointType, startAngle: numbe
   const getSegment = () =>
     Segment(
       Point(pos.x + radius * Math.sin(angle), pos.y - radius * Math.cos(angle)),
-      Point(pos.x - radius * Math.sin(angle), pos.y + radius * Math.cos(angle))
+      Point(pos.x - radius * Math.sin(angle), pos.y + radius * Math.cos(angle)),
     );
 
   return { getSegment, update };
@@ -52,7 +60,7 @@ const initSegmentAnimations = (
   vMin: number,
   vMax: number,
   rvMin: number,
-  rvMax: number
+  rvMax: number,
 ) => {
   const segmentAnimations: SegmentAnimationType[] = [];
 
@@ -63,8 +71,8 @@ const initSegmentAnimations = (
         Point(lerp(xMin, xMax, Math.random()), lerp(yMin, yMax, Math.random())),
         Math.random() * Math.PI * 2,
         lerp(vMin, vMax, Math.random()),
-        lerp(rvMin, rvMax, Math.random())
-      )
+        lerp(rvMin, rvMax, Math.random()),
+      ),
     );
   }
 
@@ -75,7 +83,19 @@ const p1 = Point(100, 100);
 const p2 = Point(500, 500);
 let s1 = Segment(p1, p2);
 
-const segmentAnimations = initSegmentAnimations(20, 0, 0, window.innerWidth, window.innerHeight, 100, 500, 2, 5, -0.02, 0.02);
+const segmentAnimations = initSegmentAnimations(
+  20,
+  0,
+  0,
+  window.innerWidth,
+  window.innerHeight,
+  100,
+  500,
+  2,
+  5,
+  -0.02,
+  0.02,
+);
 
 let mouse = Point(0, 0);
 
@@ -145,7 +165,11 @@ const getIntersect = (s1: SegmentType, s2: SegmentType): PointType | null => {
   return Point(nx, ny);
 };
 
-const drawSegment = (labelStart: string, labelEnd: string, segment: SegmentType) => {
+const drawSegment = (
+  labelStart: string,
+  labelEnd: string,
+  segment: SegmentType,
+) => {
   ctx.beginPath();
   ctx.moveTo(segment.start.x, segment.start.y);
   ctx.lineTo(segment.end.x, segment.end.y);
@@ -194,7 +218,10 @@ const animate = () => {
 
     for (const [j, segment2] of segmentAnimations.entries()) {
       if (j <= i) continue;
-      const n = getIntersect(segmentAnimation.getSegment(), segment2.getSegment());
+      const n = getIntersect(
+        segmentAnimation.getSegment(),
+        segment2.getSegment(),
+      );
 
       if (n) {
         intersections.push(n);
@@ -216,7 +243,9 @@ const animate = () => {
     if (avgFrameTimeSamples == 0) {
       avgFrameTime = frameTime;
     } else {
-      avgFrameTime = (avgFrameTime * avgFrameTimeSamples + frameTime) / (avgFrameTimeSamples + 1);
+      avgFrameTime =
+        (avgFrameTime * avgFrameTimeSamples + frameTime) /
+        (avgFrameTimeSamples + 1);
     }
 
     avgFrameTimeSamples++;
