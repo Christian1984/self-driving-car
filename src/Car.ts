@@ -1,5 +1,5 @@
 import { Controls } from "./Controls";
-import { Point, SegmentType } from "./Geometry";
+import { Point, PointType, Segment, SegmentType } from "./Geometry";
 import { Sensor } from "./Sensor";
 
 export const Car = (x: number, y: number, width: number, height: number, color: string = "black", debug: boolean = false) => {
@@ -16,6 +16,8 @@ export const Car = (x: number, y: number, width: number, height: number, color: 
   const rotation = 0.03;
 
   const sensor = Sensor(5, 200, (Math.PI * 2) / 3);
+
+  let polygon: SegmentType[] = [];
 
   const draw = (ctx: CanvasRenderingContext2D) => {
     ctx.beginPath();
@@ -45,6 +47,15 @@ export const Car = (x: number, y: number, width: number, height: number, color: 
 
     ctx.restore();
 
+    ctx.beginPath();
+    ctx.strokeStyle = "purple";
+    ctx.lineWidth = 3;
+    for (const s of polygon) {
+      ctx.moveTo(s.start.x, s.start.y);
+      ctx.lineTo(s.end.x, s.end.y);
+    }
+    ctx.stroke();
+
     sensor.draw(ctx);
 
     if (debug) {
@@ -63,8 +74,37 @@ export const Car = (x: number, y: number, width: number, height: number, color: 
     }
   };
 
+  const updatePolygon = () => {
+    polygon = [];
+    const points = [
+      Point(-width / 2, -height / 2),
+      Point(width / 2, -height / 2),
+      Point(width / 2, height / 2),
+      Point(-width / 2, height / 2),
+    ];
+
+    const pointsTransformed: PointType[] = [];
+
+    for (const p of points) {
+      const px = p.x * Math.cos(angle) - p.y * Math.sin(angle) + x;
+      const py = p.x * Math.sin(angle) + p.y * Math.cos(angle) + y;
+      pointsTransformed.push(Point(px, py));
+    }
+
+    for (const [i, pt] of pointsTransformed.entries()) {
+      if (pointsTransformed.length > 1) {
+        if (i == 0) {
+          polygon.push(Segment(pointsTransformed[pointsTransformed.length - 1], pt));
+        } else {
+          polygon.push(Segment(pt, pointsTransformed[i - 1]));
+        }
+      }
+    }
+  };
+
   const update = (roadBorders: SegmentType[]) => {
     move();
+    updatePolygon();
     sensor.update({ x, y }, angle, roadBorders);
   };
 
