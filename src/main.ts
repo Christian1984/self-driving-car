@@ -1,4 +1,4 @@
-import { Car } from "./Car";
+import { Car, CarType } from "./Car";
 import { Road } from "./Road";
 import "./style.scss";
 
@@ -14,36 +14,44 @@ const lanes = 3;
 const c = document.querySelector<HTMLCanvasElement>("canvas")!;
 c.width = 500;
 
+let cars: CarType[] = [];
+
 const ctx = c.getContext("2d")!;
 
 const road = Road(c.width, max_road_length, lanes);
-const car = Car(
-  road.getLaneCenter(Math.floor(lanes / 2)),
-  max_road_length / 2,
-  50,
-  100,
-  "black",
-  debug,
-);
-const cars = [car];
+
+const reset = () => {
+  const car = Car(
+    road.getLaneCenter(Math.floor(lanes / 2)),
+    max_road_length / 2,
+    50,
+    100,
+    "black",
+    debug,
+  );
+  cars = [car];
+};
 
 const animate = () => {
   c.height = window.innerHeight; // this automatically clears the canvas
 
   road.update();
-  car.update(road.getRoadBorders());
 
-  if (car.getPos().y < 2 * window.innerHeight) {
-    for (const c of cars) {
-      c.reset();
+  for (const car of cars) {
+    car.update(road.getRoadBorders());
+
+    if (car.getPos().y < 2 * window.innerHeight) {
+      for (const c of cars) {
+        c.reset();
+      }
     }
-  }
 
-  ctx.save();
-  ctx.translate(0, -car.getPos().y + c.height * 0.7);
-  road.draw(ctx);
-  car.draw(ctx);
-  ctx.restore();
+    ctx.save();
+    ctx.translate(0, -car.getPos().y + c.height * 0.7);
+    road.draw(ctx);
+    car.draw(ctx);
+    ctx.restore();
+  }
 
   if (debug) {
     const now = Date.now();
@@ -73,4 +81,16 @@ const animate = () => {
   requestAnimationFrame(animate);
 };
 
+const addKeyboardListeners = () => {
+  document.addEventListener("keydown", (e) => {
+    switch (e.key) {
+      case "r":
+        reset();
+        break;
+    }
+  });
+};
+
+addKeyboardListeners();
+reset();
 animate();

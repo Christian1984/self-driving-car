@@ -1,6 +1,7 @@
 import { Controls } from "./Controls";
 import { Point, PointType, Segment, SegmentType } from "./Geometry";
 import { Sensor } from "./Sensor";
+import { getIntersection } from "./utils";
 
 export const Car = (
   x: number,
@@ -24,7 +25,8 @@ export const Car = (
 
   const sensor = Sensor(5, 200, (Math.PI * 2) / 3);
 
-  let polygon: SegmentType[] = [];
+  let polygon: PointType[] = [];
+  let damaged = false;
 
   const draw = (ctx: CanvasRenderingContext2D) => {
     ctx.beginPath();
@@ -57,9 +59,13 @@ export const Car = (
     ctx.beginPath();
     ctx.strokeStyle = "purple";
     ctx.lineWidth = 3;
-    for (const s of polygon) {
-      ctx.moveTo(s.start.x, s.start.y);
-      ctx.lineTo(s.end.x, s.end.y);
+    for (const [i, p] of polygon.entries()) {
+      if (i == 0) {
+        const pStart = polygon[polygon.length - 1];
+        ctx.moveTo(pStart.x, pStart.y);
+      }
+
+      ctx.lineTo(p.x, p.y);
     }
     ctx.stroke();
 
@@ -90,31 +96,40 @@ export const Car = (
       Point(-width / 2, height / 2),
     ];
 
-    const pointsTransformed: PointType[] = [];
-
     for (const p of points) {
       const px = p.x * Math.cos(angle) - p.y * Math.sin(angle) + x;
       const py = p.x * Math.sin(angle) + p.y * Math.cos(angle) + y;
-      pointsTransformed.push(Point(px, py));
+      polygon.push(Point(px, py));
     }
+  };
 
-    for (const [i, pt] of pointsTransformed.entries()) {
-      if (pointsTransformed.length > 1) {
-        if (i == 0) {
-          polygon.push(
-            Segment(pointsTransformed[pointsTransformed.length - 1], pt),
-          );
-        } else {
-          polygon.push(Segment(pt, pointsTransformed[i - 1]));
+  const assessDamage = (roadBorders: SegmentType[]) => {
+    for (const border of roadBorders) {
+      for (const [i, p] of polygon.entries()) {
+        let pStart = polygon[polygon.length - 1];
+
+        if (i > 0) {
+          let pStart = polygon[i - 1];
+        }
+
+        const s = Segment(pStart, p);
+
+        const intersection = getIntersection(border, s);
+        if (intersection) {
+          damaged = true;
+          return;
         }
       }
     }
   };
 
   const update = (roadBorders: SegmentType[]) => {
-    move();
-    updatePolygon();
-    sensor.update({ x, y }, angle, roadBorders);
+    if (!damaged) {
+      move();
+      updatePolygon();
+      sensor.update({ x, y }, angle, roadBorders);
+      assessDamage(roadBorders);
+    }
   };
 
   const move = () => {
