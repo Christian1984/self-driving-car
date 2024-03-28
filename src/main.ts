@@ -33,12 +33,28 @@ const reset = () => {
 };
 
 const animate = () => {
+  const now = Date.now();
+  const frameTime = now - lastFrame;
+  lastFrame = now;
+
+  const delta = frameTime / 17;
+
+  if (avgFrameTimeSamples == 0) {
+    avgFrameTime = frameTime;
+  } else {
+    avgFrameTime =
+      (avgFrameTime * avgFrameTimeSamples + frameTime) /
+      (avgFrameTimeSamples + 1);
+  }
+
+  avgFrameTimeSamples++;
+
   c.height = window.innerHeight; // this automatically clears the canvas
 
-  road.update();
+  road.update(delta);
 
   for (const car of cars) {
-    car.update(road.getRoadBorders());
+    car.update(delta, road.getRoadBorders());
 
     if (car.getPos().y < 2 * window.innerHeight) {
       for (const c of cars) {
@@ -54,20 +70,6 @@ const animate = () => {
   }
 
   if (debug) {
-    const now = Date.now();
-    const frameTime = now - lastFrame;
-    lastFrame = now;
-
-    if (avgFrameTimeSamples == 0) {
-      avgFrameTime = frameTime;
-    } else {
-      avgFrameTime =
-        (avgFrameTime * avgFrameTimeSamples + frameTime) /
-        (avgFrameTimeSamples + 1);
-    }
-
-    avgFrameTimeSamples++;
-
     ctx.fillStyle = "red";
     ctx.fillText("Frametime", 10, 10);
     ctx.fillText(`Cur: ${frameTime}`, 10, 20);

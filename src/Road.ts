@@ -22,7 +22,7 @@ export const Road = (width: number, height: number, lanes: number) => {
         Segment(Point(width - lineWidth, 0), Point(width - lineWidth, height)),
       ];
     },
-    update: () => {},
+    update: (delta: number) => {},
     draw: (ctx: CanvasRenderingContext2D) => {
       ctx.lineWidth = lineWidth;
       ctx.strokeStyle = "white";

@@ -123,16 +123,16 @@ export const Car = (
     }
   };
 
-  const update = (roadBorders: SegmentType[]) => {
+  const update = (delta: number, roadBorders: SegmentType[]) => {
     if (!damaged) {
-      move();
+      move(delta);
       updatePolygon();
       sensor.update({ x, y }, angle, roadBorders);
       assessDamage(roadBorders);
     }
   };
 
-  const move = () => {
+  const move = (delta: number) => {
     if (directions.forward) {
       speed += acceleration;
     }
@@ -142,11 +142,11 @@ export const Car = (
     }
 
     if (directions.right) {
-      angle += (rotation * speed) / maxSpeed;
+      angle += ((rotation * speed) / maxSpeed) * delta;
     }
 
     if (directions.left) {
-      angle -= (rotation * speed) / maxSpeed;
+      angle -= ((rotation * speed) / maxSpeed) * delta;
     }
 
     if (Math.abs(speed) <= drag) {
@@ -167,8 +167,8 @@ export const Car = (
       speed += drag;
     }
 
-    x += speed * Math.sin(angle);
-    y -= speed * Math.cos(angle);
+    x += speed * Math.sin(angle) * delta;
+    y -= speed * Math.cos(angle) * delta;
   };
 
   const getPos = () => Point(x, y);
